@@ -43,7 +43,7 @@ def showResponse(prompts):
 #Main Code
 #------------------
 print("Hello! Welcome to the AI Security Lab, this functions as a robust way to test AI models.")
-stop = input("Would you like to enter a prompt, ask the AI or Quit the program? (P/A/Q)")
+stop = input("Would you like to enter a prompt, ask the AI or Quit the program? (P/Q)")
 stop = stop.upper()
 while stop[0] != "Q":
     if stop[0] == "A":
