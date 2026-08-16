@@ -1,0 +1,79 @@
+#Imports
+#------------------
+import ollama
+
+
+#Variables
+#------------------
+testProcess = []
+
+
+#Subprograms
+#------------------
+#Feeds the model the prompts and generates a list with its responses
+def feedModel(pTests):
+    for item in pTests:
+        if not item["tested"]:
+            response = ollama.chat(
+                model='llama3.2',
+                messages=[
+                    {
+                        'role': 'user',
+                        'content': item["prompt"]
+                    }
+                ]
+            )
+            item["answer"] = response["message"]["content"]
+            item["tested"] = True
+            item["run"] = True
+        else:
+            item["run"] = False
+
+
+#Filters through the responses and prints each prompt and response one at a time
+def showResponse(pTests):
+    for feedback in pTests:
+        print("\nPROMPT:")
+        print(feedback["prompt"])
+
+        print("\nSTATUS:")
+        if not feedback["run"]:
+            print("PREVIOUSLY TESTED")
+        else:
+            print("NEW TEST")
+            
+        print("\nRESPONSE:")
+        print(feedback["answer"])
+
+
+#Main Code
+#------------------
+print("Hello! Welcome to the AI Security Lab, this functions as a robust way to test AI models.")
+stop = input("Would you like to enter a prompt, ask the AI or Quit the program? (P/A/Q)")
+stop = stop.upper()
+while stop == "":
+    print("You didnt choose an option.")
+    stop = input("Would you like to enter a prompt, ask the AI or Quit the program? (P/Q)")
+    stop = stop.upper()
+while stop != "Q":
+    if stop == "A":
+        if not testProcess:
+            print("You havent asked any questions.")
+        else:
+            print("Asking the model. Please wait.")
+            feedModel(testProcess)
+            showResponse(testProcess)
+    elif stop == "P":
+        userInput = input("enter a prompt: ")
+        while userInput == "":
+            print("you didnt eneter a prompt")
+            userInput = input("enter a prompt: ")
+        newTest = dict(prompt = userInput, answer = "", tested = False, run = False )
+        testProcess.append(newTest)
+        print(f"The prompt '{userInput}' was added to the prompt list.")
+    else:
+        print("That wasn't an option?")
+    stop = input("Would you like to enter a prompt, ask the AI or Quit the program? (P/A/Q)")
+    stop = stop.upper()
+
+print("Goodbye!")
