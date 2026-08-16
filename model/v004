@@ -1,0 +1,116 @@
+#Imports
+#------------------
+import ollama
+
+
+#Variables
+#------------------
+testProcess = []
+validID = False
+
+
+#Subprograms
+#------------------
+#Feeds the model the prompts and generates a list with its responses
+def feedModel(pTests):
+    for item in pTests:
+        if not item["tested"]:
+            response = ollama.chat(
+                model='llama3.2',
+                messages=[
+                    {
+                        'role': 'user',
+                        'content': item["prompt"]
+                    }
+                ]
+            )
+            item["answer"] = response["message"]["content"]
+            item["tested"] = True
+            item["run"] = True
+        else:
+            item["run"] = False
+
+
+#Filters through the responses and prints each prompt and response one at a time
+def showResponse(pTests):
+    for feedback in pTests:
+        print(f"\nTEST #{feedback['testID']}")
+
+        print("\nPROMPT:")
+        print(feedback["prompt"])
+
+        print("\nSTATUS:")
+        if not feedback["run"]:
+            print("PREVIOUSLY TESTED")
+        else:
+            print("NEW TEST")
+            
+        print("\nRESPONSE:")
+        print(feedback["answer"])
+
+def showTest(pTest):
+        print(f"\nTEST #{pTest['testID']}")
+
+        print("\nPROMPT:")
+        print(pTest["prompt"])
+
+        print("\nSTATUS:")
+        if not pTest["run"]:
+            print("PREVIOUSLY TESTED")
+        else:
+            print("NEW TEST")
+            
+        print("\nRESPONSE:")
+        print(pTest["answer"])
+    
+
+
+#Main Code
+#------------------
+print("Hello! Welcome to the AI Security Lab, this functions as a robust way to test AI models.")
+stop = input("Would you like to enter a prompt, ask the AI, View a past test or Quit the program? (P/A/V/Q)")
+stop = stop.upper()
+#Checks for the inputs and validates
+while stop == "":
+    print("You didnt choose an option.")
+    stop = input("Would you like to enter a prompt, ask the AI, View a past test or Quit the program? (P/A/V/Q)")
+    stop = stop.upper()
+while stop != "Q":
+    if stop == "A":
+        if not testProcess:
+            print("You havent asked any questions.")
+        else:
+            print("Asking the model. Please wait.")
+            feedModel(testProcess)
+            showResponse(testProcess)
+    elif stop == "P":
+        userInput = input("enter a prompt: ")
+        while userInput == "":
+            print("you didnt eneter a prompt")
+            userInput = input("enter a prompt: ")
+        newTest = dict(prompt = userInput, answer = "", tested = False, run = False, testID = len(testProcess) + 1)
+        testProcess.append(newTest)
+        print(f"The prompt '{userInput}' was added to the prompt list.")
+    elif stop == "V":
+        checkID = input("enter the ID No of the test you want to check") 
+        while not validID:
+            if checkID.isnumeric():
+                checkID = int(checkID)
+                if checkID <= len(testProcess) and checkID > 0:
+                    validID = True
+                    for num in testProcess:
+                        if checkID == num["testID"]:
+                            showTest(num)
+                else:
+                    print("the ID you choose doesnt exist")
+                    checkID = input("enter the ID No of the test you want to check")
+            else:
+                print("you didnt enter a number")
+                checkID = input("enter the ID No of the test you want to check")
+        validID = False
+    else:
+        print("That wasn't an option?")
+    stop = input("Would you like to enter a prompt, ask the AI, View a past test or Quit the program? (P/A/V/Q)")
+    stop = stop.upper()
+
+print("Goodbye!")
